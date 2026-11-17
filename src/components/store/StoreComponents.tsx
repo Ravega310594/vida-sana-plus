@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Image,
@@ -157,25 +157,47 @@ export function ProductTile({
   onPress: () => void;
 }) {
   const { addToCart } = useStore();
+  const [added, setAdded] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+
+  const handleAdd = () => {
+    addToCart(product.id);
+    setAdded(true);
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => setAdded(false), 900);
+  };
 
   return (
     <View style={[styles.productTile, compact && styles.productTileCompact]}>
-      <TouchableOpacity accessibilityRole="button" onPress={onPress}>
-        <Image source={product.image} style={styles.productImage} resizeMode="cover" />
+      <TouchableOpacity accessibilityRole="button" activeOpacity={0.85} onPress={onPress}>
+        <View style={styles.tileImageWrap}>
+          <Image source={product.image} style={styles.productImage} resizeMode="cover" />
+          {product.tag ? (
+            <View style={styles.tileTag}>
+              <Text style={styles.tileTagText} numberOfLines={1}>{product.tag}</Text>
+            </View>
+          ) : null}
+        </View>
         <Text style={styles.productName} numberOfLines={2}>
           {product.name}
         </Text>
-        <Text style={styles.rating}>★ {product.rating}</Text>
+        <Text style={[styles.rating, styles.tileMeta]} numberOfLines={1}>
+          ★ {product.rating}
+          {product.calories ? ` · ${product.calories} kcal` : ''}
+        </Text>
       </TouchableOpacity>
       <View style={styles.priceLine}>
         <Text style={styles.productPrice}>{formatPrice(product.price)}</Text>
         <TouchableOpacity
           accessibilityRole="button"
           accessibilityLabel={`Agregar ${product.name} al carrito`}
-          onPress={() => addToCart(product.id)}
-          hitSlop={6}
+          onPress={handleAdd}
+          activeOpacity={0.7}
+          hitSlop={4}
+          style={styles.addCircle}
         >
-          <Text style={styles.addCircle}>+</Text>
+          <Text style={styles.addCircleText}>{added ? '✓' : '+'}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -253,7 +275,9 @@ export function RestaurantCard({
           <Text style={styles.restaurantFallbackText}>Foto próximamente</Text>
         </View>
       )}
-      <Text style={styles.restaurantName}>{restaurant.name}</Text>
+      <Text style={styles.restaurantName} numberOfLines={compact ? 1 : undefined}>
+        {restaurant.name}
+      </Text>
       <Text style={styles.restaurantMeta} numberOfLines={compact ? 1 : undefined}>
         {restaurant.cuisine} · {restaurant.priceRange} · ★ {restaurant.rating}
       </Text>

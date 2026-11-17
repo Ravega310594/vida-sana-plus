@@ -34,23 +34,32 @@ export default function HomeScreen({
       </TouchableOpacity>
       <View style={styles.heroCard}>
         <View style={styles.heroCopy}>
-          <Text style={styles.heroTitle}>Come sano, vive mejor</Text>
+          <Text style={styles.heroKicker}>🌱 NUTRICIÓN QUE SE SIENTE</Text>
+          <Text style={styles.heroTitle} accessibilityRole="header">
+            Come sano,{'\n'}
+            <Text style={styles.heroTitleAccent}>vive mejor</Text>
+          </Text>
           <Text style={styles.heroDescription}>
-            Recetas, productos y comidas saludables a tu alcance.
+            Platos frescos, recetas y productos que te cuidan. Hoy empieza tu mejor versión.
           </Text>
           <TouchableOpacity
             style={styles.heroButton}
             onPress={() => navigation.navigate('Search')}
+            accessibilityRole="button"
+            accessibilityLabel="Explorar ahora"
           >
-            <Text style={styles.heroButtonText}>Explorar ahora  ›</Text>
+            <Text style={styles.heroButtonText}>Explorar ahora  →</Text>
           </TouchableOpacity>
         </View>
-        <Image
-          source={PRODUCTS[0].image}
-          style={styles.heroImage}
-          resizeMode="cover"
-          accessibilityLabel="Comida saludable"
-        />
+        <View style={styles.heroImageWrap}>
+          <View style={styles.heroImageCircle} />
+          <Image
+            source={PRODUCTS[0].image}
+            style={styles.heroImage}
+            resizeMode="cover"
+            accessibilityLabel="Comida saludable"
+          />
+        </View>
       </View>
 
       <View style={styles.categoryGrid}>
@@ -90,7 +99,12 @@ export default function HomeScreen({
         action="Ver todos ›"
         onPress={() => navigation.navigate('Search')}
       />
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        decelerationRate="fast"
+        contentContainerStyle={styles.homeFeaturedRow}
+      >
         {featured.map((product) => (
           <ProductTile
             key={product.id}
