@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Alert,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -18,6 +17,8 @@ import { sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/aut
 import { auth } from '../../miAppMovil/firebaseConfig';
 import SocialAuthOptions from '../components/SocialAuthOptions';
 import { RootStackParamList } from '../types/navigation';
+import { getLoginErrorMessage } from '../utils/auth';
+import { notify } from '../utils/notify';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 const REMEMBERED_EMAIL_KEY = 'vidasana.rememberedEmail';
@@ -41,7 +42,7 @@ export default function LoginScreen({ navigation }: Props) {
       } catch (error) {
         console.error('No se pudo recuperar el correo guardado.', error);
         if (isMounted) {
-          Alert.alert('No se pudo recuperar la cuenta', 'Puedes ingresar tu correo manualmente.');
+          notify('No se pudo recuperar la cuenta', 'Puedes ingresar tu correo manualmente.');
         }
       } finally {
         if (isMounted) setIsRememberingLoading(false);
@@ -66,22 +67,19 @@ export default function LoginScreen({ navigation }: Props) {
       setRememberAccount(false);
     } catch (error) {
       console.error('No se pudo borrar el correo guardado.', error);
-      Alert.alert('No se pudo actualizar la opción', 'Intenta nuevamente.');
+      notify('No se pudo actualizar la opción', 'Intenta nuevamente.');
     }
   };
 
   const handleLogin = async () => {
     if (!email.trim() || !password) {
-      Alert.alert('Falta información', 'Ingresa tu correo y contraseña para continuar.');
+      notify('Falta información', 'Ingresa tu correo y contraseña para continuar.');
       return;
     }
     try {
       await signInWithEmailAndPassword(auth, email.trim(), password);
     } catch (error) {
-      Alert.alert(
-        'No se pudo iniciar sesión',
-        error instanceof Error ? error.message : 'Intenta nuevamente.',
-      );
+      notify('No se pudo iniciar sesión', getLoginErrorMessage(error));
       return;
     }
 
@@ -93,7 +91,7 @@ export default function LoginScreen({ navigation }: Props) {
       }
     } catch (error) {
       console.error('No se pudo guardar la preferencia de cuenta.', error);
-      Alert.alert(
+      notify(
         'Sesión iniciada',
         'No se pudo guardar el correo para el próximo inicio de sesión.',
       );
@@ -102,14 +100,14 @@ export default function LoginScreen({ navigation }: Props) {
 
   const handlePasswordReset = async () => {
     if (!email.trim()) {
-      Alert.alert('Ingresa tu correo', 'Escribe tu correo para recuperar la contraseña.');
+      notify('Ingresa tu correo', 'Escribe tu correo para recuperar la contraseña.');
       return;
     }
     try {
       await sendPasswordResetEmail(auth, email.trim());
-      Alert.alert('Correo enviado', 'Revisa tu bandeja de entrada para restablecer tu contraseña.');
+      notify('Correo enviado', 'Revisa tu bandeja de entrada para restablecer tu contraseña.');
     } catch (error) {
-      Alert.alert(
+      notify(
         'No se pudo enviar el correo',
         error instanceof Error ? error.message : 'Intenta nuevamente.',
       );

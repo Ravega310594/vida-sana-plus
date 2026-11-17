@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getFirebaseAuthErrorCode, isStrongPassword } from './auth';
+import { getFirebaseAuthErrorCode, getLoginErrorMessage, isStrongPassword } from './auth';
 
 describe('isStrongPassword', () => {
   it('requires 8 characters, uppercase, lowercase, and a number', () => {
@@ -18,5 +18,13 @@ describe('getFirebaseAuthErrorCode', () => {
     );
     expect(getFirebaseAuthErrorCode(new Error('unknown'))).toBeUndefined();
     expect(getFirebaseAuthErrorCode(null)).toBeUndefined();
+  });
+});
+
+describe('getLoginErrorMessage', () => {
+  it('explains wrong credentials and falls back for unknown errors', () => {
+    expect(getLoginErrorMessage({ code: 'auth/invalid-credential' })).toContain('incorrectos');
+    expect(getLoginErrorMessage({ code: 'auth/too-many-requests' })).toContain('intentos');
+    expect(getLoginErrorMessage(new Error('x'))).toContain('No pudimos');
   });
 });
